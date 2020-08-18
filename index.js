@@ -16,15 +16,117 @@ async function auth() {
         }
     });
     await octokit.auth({ type: 'app' });
+    return octokit;
 }
 
-auth();
+async function close(owner, repo, commit_sha, author) {
+    const octokit = await auth();
+    // data is an array of comments
+    const { data } = await octokit.repos.listCommentsForCommit({
+        owner,
+        repo,
+        commit_sha,
+    });
 
-const { payload, event } = github.context.payload.inputs;
-core.debug(`payload: ${payload}`);
-core.debug(`event: ${event}`);
+    core.debug(`Attempting to close meep for ${owner}/${repo}/${commit_sha} on behalf of ${author}`);
 
-if (payload) {
-    const decoded = Buffer.from(payload, 'base64');
-    core.debug(JSON.parse(decoded));
+    // Scan for the comment from themeepbot[bot]
+    for (let i = 0; i !== data.length; ++i) {
+        const comment = data[i];
+        if (comment.user.login === 'themeepbot[bot]') {
+            const lines = comment.body.split('\n');
+            if (lines.length === 0) {
+                continue;
+            }
+
+            // Check that the commit author matches the comment author
+            const first = lines[0];
+            const name = first.match(/Hey there @(\S+)/);
+            if (!name) {
+                continue;
+            }
+
+            const user = name[1];
+            if (user !== author) {
+                // Don't handle close requests by users other than the
+                // original meeper
+                core.debug(`Received close request from ${user} instead of the meeper ${author}`);
+                return;
+            }
+
+            // Parse the comment body for the issue number
+            const last = lines[lines.length - 1];
+            const matches = last.match(/meep no\. (\d+)/);
+            if (!matches) {
+                continue;
+            }
+            const issue_no = matches[1];
+            // Close the corresponding issue in the meeps database
+            core.debug(`Locking issue ${issue_no}`);
+            octokit.issues.lock({
+                owner: 'moreeyesplz',
+                repo: 'meeps',
+                issue_number: issue_no,
+            });
+            break;
+        }
+    }
+
+    core.warning(`No comments found associated with themeepbot for ${owner}/${repo}/${commit_sha}`);
 }
+
+function run() {
+    const { payload, event } = github.context.payload.inputs;
+
+    // The bot only responds to commit comments at the moment
+    if (event !== 'commit_comment') {
+        return;
+    }
+
+    if (!payload) {
+        return;
+    }
+
+    const { action, comment, repository } = Buffer.from(payload, 'base64');
+    if (action !== 'created') {
+        return;
+    }
+
+    if (!comment) {
+        return;
+    }
+
+    const { user, body, commit_id, } = comment;
+
+    if (user.login === 'themeepbot[bot]') {
+        // Don't handle comments made by this bot.
+        return;
+    }
+
+    const matches = body.match(/\[meep (.*)\]/);
+    if (!matches) {
+        // No bot command recognized
+        return;
+    }
+
+    const command = matches[1];
+    if (!command) {
+        // Empty command specified
+        return;
+    }
+
+    const args = command.split(' ');
+    switch (args[0]) {
+        case 'close':
+            if (args.length === 1) {
+                close(repository.owner.login, repository.name, commit_id, user.login);
+            }
+            break;
+        default:
+            // Unrecognized command
+            core.debug(`Received unrecognized command ${command}`);
+            return;
+    }
+}
+
+run();
