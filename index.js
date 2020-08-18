@@ -20,9 +20,9 @@ async function auth() {
 auth();
 
 const payload = core.getInput('payload');
-core.debug(payload);
+core.info(payload);
 
 if (payload) {
     const decoded = Buffer.from(payload, 'base64');
-    core.debug(JSON.parse(decoded));
+    core.info(JSON.parse(decoded));
 }
