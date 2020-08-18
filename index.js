@@ -19,10 +19,11 @@ async function auth() {
 
 auth();
 
-const payload = core.getInput('payload');
-core.info(payload);
+const { payload, event } = github.context.payload.inputs;
+core.debug(`payload: ${payload}`);
+core.debug(`event: ${event}`);
 
 if (payload) {
     const decoded = Buffer.from(payload, 'base64');
-    core.info(JSON.parse(decoded));
+    core.debug(JSON.parse(decoded));
 }
