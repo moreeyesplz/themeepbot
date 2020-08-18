@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     name: themeepbot
     steps:
-      - users: moreeyesplz/themeepbot@master
+      - uses: moreeyesplz/themeepbot@master
         with:
           bot_id: ${{ secrets.BOT_ID }}
           bot_key: ${{ secrets.BOT_KEY }}
