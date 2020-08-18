@@ -4,6 +4,16 @@ description: 'Webhook responder for themeepbot'
 runs:
   using: 'node12'
   main: 'index.js'
+inputs:
+  bot_id:
+    description: 'App id'
+    required: true
+  bot_install_id:
+    description: 'App install id'
+    required: true
+  bot_key:
+    description: 'Bot pkey'
+    required: true
 branding:
   icon: zap
   color: yellow

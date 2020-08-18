@@ -8,6 +8,9 @@ on:
       payload:
         description: 'base64 encoded webhook event payload'
         required: true
+      event:
+        description: 'Webhook event that triggered the delivery'
+        required: true
 
 jobs:
   themeepbot:
