@@ -1,0 +1,21 @@
+name: themeepbot
+
+# Inputs to the workflow dispatch event are limited to 10, so we base64 encode the
+# entirety of the event payload json instead
+on:
+  workflow_dispatch:
+    inputs:
+      payload:
+        description: 'base64 encoded webhook event payload'
+        required: true
+
+jobs:
+  themeepbot:
+    runs-on: ubuntu-latest
+    name: themeepbot
+    steps:
+      - users: moreeyesplz/themeepbot@master
+        with:
+          bot_id: ${{ secrets.BOT_ID }}
+          bot_key: ${{ secrets.BOT_KEY }}
+          bot_install_id: ${{ secrets.BOT_INSTALL_ID }}
