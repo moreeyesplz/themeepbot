@@ -63,10 +63,11 @@ async function close(owner, repo, commit_sha, author) {
             const issue_no = matches[1];
             // Close the corresponding issue in the meeps database
             core.debug(`Locking issue ${issue_no}`);
-            octokit.issues.lock({
+            octokit.issues.update({
                 owner: 'moreeyesplz',
                 repo: 'meeps',
                 issue_number: issue_no,
+                state: 'closed'
             });
             break;
         }
