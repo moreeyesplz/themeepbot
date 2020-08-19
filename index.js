@@ -3,6 +3,7 @@ const github = require('@actions/github');
 const { Octokit } = require('@octokit/rest');
 const { createAppAuth } = require('@octokit/auth-app');
 
+/*
 async function auth() {
     const bot_id = parseInt(core.getInput('bot_id'));
     const install_id = parseInt(core.getInput('bot_install_id'));
@@ -74,6 +75,7 @@ async function close(owner, repo, commit_sha, author) {
 
     core.warning(`No comments found associated with themeepbot for ${owner}/${repo}/${commit_sha}`);
 }
+*/
 
 function run() {
     core.info('Inputs: ' + JSON.stringify(github.context.payload.inputs));
@@ -125,7 +127,8 @@ function run() {
     switch (args[0]) {
         case 'close':
             if (args.length === 1) {
-                close(repository.owner.login, repository.name, commit_id, user.login);
+                core.debug(`closing meep ${repository.owner.login}/${repository.name}/${commit_id} for ${user.login}`);
+                // close(repository.owner.login, repository.name, commit_id, user.login);
             }
             break;
         default:
