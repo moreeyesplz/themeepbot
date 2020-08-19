@@ -40,8 +40,8 @@ async function close(owner, repo, commit_sha, author) {
             }
 
             // Check that the commit author matches the comment author
-            const first = lines[0];
-            const name = first.match(/Hey there @(\S+)/);
+            const greeting = lines[1];
+            const name = greeting.match(/Hey there @(\S+)/);
             if (!name) {
                 continue;
             }
