@@ -76,7 +76,10 @@ async function close(owner, repo, commit_sha, author) {
 }
 
 function run() {
+    core.info('Inputs: ' + JSON.stringify(github.context.payload.inputs));
     const { payload, event } = github.context.payload.inputs;
+    core.debug(JSON.stringify(payload));
+    core.debug(JSON.stringify(event));
 
     // The bot only responds to commit comments at the moment
     if (event !== 'commit_comment') {
@@ -88,6 +91,9 @@ function run() {
     }
 
     const { action, comment, repository } = Buffer.from(payload, 'base64');
+    core.debug(JSON.stringify(action));
+    core.debug(JSON.stringify(comment));
+    core.debug(JSON.stringify(repository));
     if (action !== 'created') {
         return;
     }
@@ -129,4 +135,8 @@ function run() {
     }
 }
 
-run();
+try {
+    run();
+} catch (e) {
+    core.setFailed(e);
+}
